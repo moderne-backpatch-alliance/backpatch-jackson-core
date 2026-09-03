@@ -1395,4 +1395,36 @@ public abstract class ParserBase extends ParserMinimalBase
     // Can't declare as deprecated, for now, but shouldn't be needed
     protected void _finishString() throws IOException { }
 
+    /**
+     * Maximum nesting depth this parser will accept.
+     *
+     * <p>Upstream makes this configurable through StreamReadConstraints, which is a 2.15 feature.
+     * It is fixed here on purpose: exposing the setting would add public configuration API that a
+     * consumer — or another backpatched artifact — would then have to depend on to get the fix,
+     * and a coordinate that only works alongside a second backpatched coordinate is not a drop-in
+     * replacement. The value is upstream's own default.
+     */
+    private static final int MAX_NESTING_DEPTH = 1000;
+
+    protected final void createChildArrayContext(final int lineNr, final int colNr) throws IOException {
+        _parsingContext = _parsingContext.createChildArrayContext(lineNr, colNr);
+        _verifyNestingDepth();
+    }
+
+    protected final void createChildObjectContext(final int lineNr, final int colNr) throws IOException {
+        _parsingContext = _parsingContext.createChildObjectContext(lineNr, colNr);
+        _verifyNestingDepth();
+    }
+
+    /**
+     * Reported through the existing {@code _reportError}, so the failure is a JsonParseException
+     * the caller already handles rather than a new exception type they would have to catch.
+     */
+    private void _verifyNestingDepth() throws IOException {
+        final int depth = _parsingContext.getNestingDepth();
+        if (depth > MAX_NESTING_DEPTH) {
+            _reportError("Depth (" + depth + ") exceeds the maximum allowed nesting depth ("
+                    + MAX_NESTING_DEPTH + ")");
+        }
+    }
 }
