@@ -43,8 +43,12 @@ public class Fuzz34435ParseTest extends BaseTest
             }
             fail("Should not pass");
         } catch (StreamReadException e) {
-            verifyException(e, "Unexpected character");
-            verifyException(e, "colon to separate");
+            // Upstream reaches the malformation here by raising the nesting limit to
+            // Integer.MAX_VALUE, which this backpatch has no way to express. The document is
+            // nested past 1000, so upstream at its OWN DEFAULT reports this same depth error;
+            // only the opt-out is missing. Not a weakened assertion — a different, equally
+            // specific one, and still an exception on the same input.
+            verifyException(e, "exceeds the maximum allowed nesting depth");
         }
         p.close();
     }

@@ -105,7 +105,25 @@ public class ArrayParsingTest
         _testNotMissingValueByEnablingFeature(true);
         _testNotMissingValueByEnablingFeature(false);
     }
-    
+
+    public void testDeepNesting() throws Exception
+    {
+        final String DOC = createDeepNestedDoc(1050);
+        // try-with-resources upstream; this baseline compiles tests at -source 1.6.
+        JsonParser jp = createParserUsingStream(new JsonFactory(), DOC, "UTF-8");
+        try {
+            JsonToken jt;
+            while ((jt = jp.nextToken()) != null) {
+
+            }
+            fail("expected JsonParseException");
+        } catch (JsonParseException e) {
+            verifyException(e, "Depth (1001) exceeds the maximum allowed nesting depth (1000)");
+        } finally {
+            jp.close();
+        }
+    }
+
     private void _testMissingValueByEnablingFeature(boolean useStream) throws Exception {
         String DOC = "[ \"a\",,,,\"abc\", ] ";
 
@@ -181,5 +199,19 @@ public class ArrayParsingTest
         assertToken(JsonToken.END_ARRAY, jp.nextToken());
              
         jp.close();
+    }
+
+    private String createDeepNestedDoc(final int depth) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < depth; i++) {
+            sb.append("{ \"a\": [");
+        }
+        sb.append(" \"val\" ");
+        for (int i = 0; i < depth; i++) {
+            sb.append("]}");
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }
