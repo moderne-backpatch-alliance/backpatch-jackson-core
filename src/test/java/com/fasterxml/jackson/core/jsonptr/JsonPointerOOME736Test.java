@@ -16,11 +16,19 @@ public class JsonPointerOOME736Test extends BaseTest
                 parser.nextToken();
             }
         } catch (StreamReadException e) {
-            verifyException(e, "Unexpected end");
+            // Adapted for the backpatched nesting-depth limit: the parse now stops at
+            // 1000 rather than running on to end-of-input at 120k, so this hostile
+            // input raises the depth error instead of "Unexpected end". What the test
+            // is FOR is unchanged -- that pathAsPointer() can build the pointer for the
+            // deepest context reached without OOME (jackson-core#736) -- and it is now
+            // asserted at the deepest depth this artifact can be driven to.
+            verifyException(e, "exceeds the maximum allowed nesting depth");
             JsonStreamContext parsingContext = parser.getParsingContext();
             JsonPointer jsonPointer = parsingContext.pathAsPointer(); // OOME
             String pointer = jsonPointer.toString();
-            String expected = new String(new char[MAX_DEPTH - 1]).replace("\0", "/0");
+            // 1000 array contexts are open when the 1001st is refused, and the root
+            // context contributes no segment, so the pointer has 1000 segments.
+            String expected = new String(new char[1000]).replace("\0", "/0");
             assertEquals(expected, pointer);
         }
         parser.close();
