@@ -395,7 +395,7 @@ public class NonBlockingJsonParser
                 if (_numberNegative) {
                     --len;
                 }
-                _intLength = len;
+                _setIntLength(len);
             }
             return _valueComplete(JsonToken.VALUE_NUMBER_INT);
 
@@ -1327,7 +1327,7 @@ public class NonBlockingJsonParser
         while (true) {
             if (ch < INT_0) {
                 if (ch == INT_PERIOD) {
-                    _intLength = outPtr;
+                    _setIntLength(outPtr);
                     ++_inputPtr;
                     return _startFloat(outBuf, outPtr, ch);
                 }
@@ -1335,7 +1335,7 @@ public class NonBlockingJsonParser
             }
             if (ch > INT_9) {
                 if (ch == INT_e || ch == INT_E) {
-                    _intLength = outPtr;
+                    _setIntLength(outPtr);
                     ++_inputPtr;
                     return _startFloat(outBuf, outPtr, ch);
                 }
@@ -1350,11 +1350,12 @@ public class NonBlockingJsonParser
             if (++_inputPtr >= _inputEnd) {
                 _minorState = MINOR_NUMBER_INTEGER_DIGITS;
                 _textBuffer.setCurrentLength(outPtr);
+                _setIntLength(outPtr);
                 return (_currToken = JsonToken.NOT_AVAILABLE);
             }
             ch = _inputBuffer[_inputPtr] & 0xFF;
         }
-        _intLength = outPtr;
+        _setIntLength(outPtr);
         _textBuffer.setCurrentLength(outPtr);
         return _valueComplete(JsonToken.VALUE_NUMBER_INT);
     }
@@ -1394,7 +1395,7 @@ public class NonBlockingJsonParser
         while (true) {
             if (ch < INT_0) {
                 if (ch == INT_PERIOD) {
-                    _intLength = outPtr-1;
+                    _setIntLength(outPtr-1);
                     ++_inputPtr;
                     return _startFloat(outBuf, outPtr, ch);
                 }
@@ -1402,7 +1403,7 @@ public class NonBlockingJsonParser
             }
             if (ch > INT_9) {
                 if (ch == INT_e || ch == INT_E) {
-                    _intLength = outPtr-1;
+                    _setIntLength(outPtr-1);
                     ++_inputPtr;
                     return _startFloat(outBuf, outPtr, ch);
                 }
@@ -1416,11 +1417,12 @@ public class NonBlockingJsonParser
             if (++_inputPtr >= _inputEnd) {
                 _minorState = MINOR_NUMBER_INTEGER_DIGITS;
                 _textBuffer.setCurrentLength(outPtr);
+                _setIntLength(outPtr-1);
                 return (_currToken = JsonToken.NOT_AVAILABLE);
             }
             ch = _inputBuffer[_inputPtr] & 0xFF;
         }
-        _intLength = outPtr-1;
+        _setIntLength(outPtr-1);
         _textBuffer.setCurrentLength(outPtr);
         return _valueComplete(JsonToken.VALUE_NUMBER_INT);
     }
@@ -1603,12 +1605,16 @@ public class NonBlockingJsonParser
             if (_inputPtr >= _inputEnd) {
                 _minorState = MINOR_NUMBER_INTEGER_DIGITS;
                 _textBuffer.setCurrentLength(outPtr);
+                // [core#1556]: validate accumulated integer length so far before yielding
+                // NOT_AVAILABLE; otherwise a stream of digit-only chunks can grow the buffer
+                // past the number-length limit (sibling of #1555).
+                _setIntLength(outPtr + negMod);
                 return (_currToken = JsonToken.NOT_AVAILABLE);
             }
             int ch = _inputBuffer[_inputPtr] & 0xFF;
             if (ch < INT_0) {
                 if (ch == INT_PERIOD) {
-                    _intLength = outPtr+negMod;
+                    _setIntLength(outPtr+negMod);
                     ++_inputPtr;
                     return _startFloat(outBuf, outPtr, ch);
                 }
@@ -1616,7 +1622,7 @@ public class NonBlockingJsonParser
             }
             if (ch > INT_9) {
                 if (ch == INT_e || ch == INT_E) {
-                    _intLength = outPtr+negMod;
+                    _setIntLength(outPtr+negMod);
                     ++_inputPtr;
                     return _startFloat(outBuf, outPtr, ch);
                 }
@@ -1630,7 +1636,7 @@ public class NonBlockingJsonParser
             }
             outBuf[outPtr++] = (char) ch;
         }
-        _intLength = outPtr+negMod;
+        _setIntLength(outPtr+negMod);
         _textBuffer.setCurrentLength(outPtr);
         return _valueComplete(JsonToken.VALUE_NUMBER_INT);
     }
@@ -2898,4 +2904,32 @@ public class NonBlockingJsonParser
     /* Internal methods, other
     /**********************************************************************
      */
+
+    /*
+    /**********************************************************************
+    /* Internal methods, number length enforcement
+    /**********************************************************************
+     */
+
+    /**
+     * Upstream's own default for {@code StreamReadConstraints.maxNumberLength}
+     * ({@code DEFAULT_MAX_NUM_LEN}, 1000), applied here as a fixed internal limit:
+     * 2.13.x has no {@code StreamReadConstraints}, and adding it would make this
+     * coordinate something a consumer has to configure to get the fix.
+     */
+    private final static int MAX_NUMBER_LENGTH = 1000;
+
+    private void _setIntLength(final int len) throws IOException {
+        _verifyNumberLength(len);
+        _intLength = len;
+    }
+
+
+
+    private void _verifyNumberLength(final int len) throws IOException {
+        if (len > MAX_NUMBER_LENGTH) {
+            _reportError(String.format("Number value length (%d) exceeds the maximum allowed (%d)",
+                    len, MAX_NUMBER_LENGTH));
+        }
+    }
 }
