@@ -42,6 +42,29 @@ public class ParserErrorHandlingTest
         _testMangledNumbersFloat(MODE_READER);
     }
 
+    // CVE-2026-89425: DataInput parser did not cap the token in its error message
+    public void testErrorTokenLengthBounded() throws Exception {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 10000; i++) {
+            sb.append('x');
+        }
+        final String doc = sb.append(' ').toString();
+        for (int mode : ALL_MODES) {
+            JsonParser p = createParser(mode, doc);
+            try {
+                JsonToken t = p.nextToken();
+                fail("Expected an exception for unrecognized token; instead got token: "+t);
+            } catch (JsonParseException e) {
+                String msg = e.getOriginalMessage();
+                verifyException(e, "Unrecognized token");
+                verifyException(e, "...");
+                assertTrue("mode "+mode+": message length "+msg.length(), msg.length() < 600);
+            } finally {
+                p.close();
+            }
+        }
+    }
+
     /*
     /**********************************************************
     /* Helper methods
