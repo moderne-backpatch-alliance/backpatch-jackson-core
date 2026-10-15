@@ -1,6 +1,6 @@
 schema: osera-patch-evidence/0.1.0
 producer: moderne
-release: 2.13.5.1-backpatch-00009
+release: 2.13.5.1-backpatch-00010
 baseline: v2.13.5+backpatch.baseline
 fixes:
   - cve: CVE-2025-52999
@@ -47,17 +47,21 @@ fixes:
     upstream: https://nvd.nist.gov/vuln/detail/CVE-2026-89425
     artifacts:
       - com.fasterxml.jackson.core:jackson-core
-    note: New in this release; ported onto 2.13.5; fixed at 2.13.5.1-backpatch-00009 (backpatch-jackson-core@f87ed4f).
+    note: Carried from 2.13.5.1-backpatch-00009; ported onto 2.13.5; fixed at 2.13.5.1-backpatch-00009 (backpatch-jackson-core@f87ed4f).
   - cve: CVE-2026-68494
     upstream: https://nvd.nist.gov/vuln/detail/CVE-2026-68494
     artifacts:
       - com.fasterxml.jackson.core:jackson-core
-    note: New in this release; ported onto 2.13.5; fixed at 2.13.5.1-backpatch-00009 (backpatch-jackson-core@4d6b1ea..f87ed4f).
+    note: Carried from 2.13.5.1-backpatch-00009; ported onto 2.13.5; fixed at 2.13.5.1-backpatch-00009 (backpatch-jackson-core@4d6b1ea..f87ed4f).
+  - cve: CVE-2026-91776
+    upstream: https://nvd.nist.gov/vuln/detail/CVE-2026-91776
+    artifacts:
+      - com.fasterxml.jackson.core:jackson-databind
+    note: New in this release; ported onto 2.13.5; fixed at 2.13.5.1-backpatch-00010 (backpatch-jackson-databind@09f5955).
 tests:
-  commit: f87ed4f0dc9e7b3727cd3ee1d451cf1197974f30
-  command: mvn -B -q test -Dmaven.javadoc.skip=true -Denforcer.skip=true -Dgpg.skip=true
-  runtime: OpenJDK 1.8.0_382 (Zulu), Apache Maven 3.9.16
-  report: jackson-core-2.13.5.1-backpatch-00009-tests.zip
-  report_sha256: 42e5682474e9740ab3d371443a74263bbf48908ff216e15cbb41e9b79cf7977d
+  commit: 7a66e3c3332c40b8bb17f19f8bc921fd29e932b5
+  command: none in this repository
+  runtime: none, no build or test ran for this release
+  report: carried, see the evidence of the release named in the note
   result: pass
-  note: the suite of jackson-core at the tested commit, 942 test(s) run, 0 failed; it includes ParserErrorHandlingTest.testErrorTokenLengthBounded, which the CVE-2026-89425 fix commit added and which fails without the fix; the CVE-2026-68494 fix commit (4d6b1ea) added no test
+  note: this release changes only the versions this repository pins, nothing ran here; its test provenance is CVE-2026-91776 carried by moderne-backpatch-alliance/backpatch-jackson-databind at v2.13.5.1-backpatch-00010, whose .backpatch/patch-evidence.yaml records the tests that ran
