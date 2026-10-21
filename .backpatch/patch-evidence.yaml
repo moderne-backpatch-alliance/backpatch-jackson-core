@@ -1,6 +1,6 @@
 schema: osera-patch-evidence/0.1.0
 producer: moderne
-release: 2.19.4.1-backpatch-00002
+release: 2.19.4.1-backpatch-00003
 baseline: v2.19.4+backpatch.baseline
 fixes:
   - cve: CVE-2026-18401
@@ -19,11 +19,19 @@ fixes:
     artifacts:
       - com.fasterxml.jackson.core:jackson-core
     note: New in 2.19.4.1-backpatch-00002 (backpatch-jackson-core@adbacf4).
+  - cve: CVE-2026-89425
+    upstream_fix_url: https://github.com/FasterXML/jackson-core/commit/211cf2c5d91abbec38067f37efc1363cd4e88ee3
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-89425
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-jackson-core/commit/a6020af
+    basis: adapted
+    artifacts:
+      - com.fasterxml.jackson.core:jackson-core
+    note: New in 2.19.4.1-backpatch-00003 (backpatch-jackson-core@a6020af).
 tests:
-  commit: adbacf4d9000bbedb52c5c2adde8208c644a0837
+  commit: a6020afe8885dc708679617c2080273be3bf36c2
   command: JAVA_HOME=<jdk-8> mvn -B clean test
   runtime: Azul Zulu (Java 1.8.0_382), Apache Maven 3.9.16, macOS aarch64
-  report: jackson-core-2.19.4.1-backpatch-00002-tests.zip
-  report_sha256: 322948c0ee79963a586a1e71043e4e3a6dbff1a781b283216914688a6288d91d
+  report: jackson-core-2.19.4.1-backpatch-00003-tests.zip
+  report_sha256: 08998621eedc83701f69c4847a2527c41f941dca073b7b734678db0b649b5039
   result: pass
-  note: the full suite, 1478 tests run, 0 failed, 2 skipped; the regression tests for CVE-2026-68494 are AsyncNumberLengthConsistencyTest; the suite ran at 8d85e2720b99, the same tree as this commit apart from .backpatch/patch-evidence.yaml
+  note: the full suite, 1480 tests run, 0 failed, 2 skipped; the regression tests for CVE-2026-89425 are ErrorReportConfigurationTest, ParserErrorHandlingTest; the suite ran at 5209faf3f6e3, the same tree as this commit apart from .backpatch/patch-evidence.yaml
