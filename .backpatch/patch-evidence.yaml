@@ -1,6 +1,6 @@
 schema: osera-patch-evidence/0.1.0
 producer: moderne
-release: 2.15.4.1-backpatch-00015
+release: 2.15.4.1-backpatch-00016
 baseline: v2.15.4+backpatch.baseline
 fixes:
   - cve: CVE-2026-18401
@@ -122,11 +122,19 @@ fixes:
     basis: adapted
     artifacts:
       - com.fasterxml.jackson.core:jackson-databind
-    note: New in this release; ported onto 2.15.4; fixed at 2.15.4.1-backpatch-00015 (backpatch-jackson-databind@dcb84f5).
+    note: Carried from 2.15.4.1-backpatch-00015; ported onto 2.15.4; fixed at 2.15.4.1-backpatch-00015 (backpatch-jackson-databind@dcb84f5).
+  - cve: CVE-2026-19032
+    upstream_fix_url: https://github.com/FasterXML/jackson-databind/commit/cc6756b61ed90b6b9227f670e0408d5d9bd48551
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-19032
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-jackson-databind/commit/ba4c632
+    basis: adapted
+    artifacts:
+      - com.fasterxml.jackson.core:jackson-databind
+    note: New in this release; ported onto 2.15.4; fixed at 2.15.4.1-backpatch-00016 (backpatch-jackson-databind@ba4c632).
 tests:
-  commit: b1a24cf478632e5988ac4f43247a867193d260ea
+  commit: d35f080e0fcaa3aed9a41efffd29b951351f3c28
   command: none in this repository
   runtime: none, no build or test ran for this release
   report: carried, see the evidence of the release named in the note
   result: pass
-  note: this release changes only the versions this repository pins, nothing ran here; its test provenance is CVE-2026-54516 carried by moderne-backpatch-alliance/backpatch-jackson-databind at v2.15.4.1-backpatch-00015, whose .backpatch/patch-evidence.yaml records the tests that ran
+  note: this release changes only the versions this repository pins, nothing ran here; its test provenance is CVE-2026-19032 carried by moderne-backpatch-alliance/backpatch-jackson-databind at v2.15.4.1-backpatch-00016, whose .backpatch/patch-evidence.yaml records the tests that ran
