@@ -1,0 +1,21 @@
+schema: osera-patch-evidence/0.1.0
+producer: moderne
+release: 2.19.4.1-backpatch-00001
+baseline: v2.19.4+backpatch.baseline
+fixes:
+  - cve: CVE-2026-18401
+    upstream_fix_url: https://github.com/FasterXML/jackson-core/commit/b0c428e6f993e1b5ece5c1c3cb2523e887cd52cf
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-18401
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-jackson-core/commit/5fe0714
+    basis: adapted
+    artifacts:
+      - com.fasterxml.jackson.core:jackson-core
+    note: New in 2.19.4.1-backpatch-00001 (backpatch-jackson-core@5fe0714).
+tests:
+  commit: 5fe071430143fa5d6617647ebca1aa63a8bc4a56
+  command: JAVA_HOME=<jdk-8> mvn -B clean test
+  runtime: Azul Zulu (Java 1.8.0_382), Apache Maven 3.9.16, macOS aarch64
+  report: jackson-core-2.19.4.1-backpatch-00001-tests.zip
+  report_sha256: caa84e8830f990c380e187dd59d093821124122175ef77b4266803068bb31bf1
+  result: pass
+  note: the full suite, 1473 tests run, 0 failed, 2 skipped; the regression tests for CVE-2026-18401 are AsyncLargeNumberReadTest, LargeNumberReadTest
