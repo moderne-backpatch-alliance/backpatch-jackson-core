@@ -1,6 +1,6 @@
 schema: osera-patch-evidence/0.1.0
 producer: moderne
-release: 2.15.4.1-backpatch-00003
+release: 2.15.4.1-backpatch-00004
 baseline: v2.15.4+backpatch.baseline
 fixes:
   - cve: CVE-2026-18401
@@ -10,7 +10,7 @@ fixes:
     basis: adapted
     artifacts:
       - com.fasterxml.jackson.core:jackson-core
-    note: New in 2.15.4.1-backpatch-00001 (backpatch-jackson-core@f1497ff).
+    note: Carried from 2.15.4.1-backpatch-00001; ported onto 2.15.4; fixed at 2.15.4.1-backpatch-00001 (backpatch-jackson-core@f1497ff).
   - cve: CVE-2026-68494
     upstream_fix_url: https://github.com/FasterXML/jackson-core/commit/4cdd529749da396cc7edf6d4a2aad41d47902641
     advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-68494
@@ -18,7 +18,7 @@ fixes:
     basis: backport
     artifacts:
       - com.fasterxml.jackson.core:jackson-core
-    note: New in 2.15.4.1-backpatch-00002 (backpatch-jackson-core@bc86f5f).
+    note: Carried from 2.15.4.1-backpatch-00002; ported onto 2.15.4; fixed at 2.15.4.1-backpatch-00002 (backpatch-jackson-core@bc86f5f).
   - cve: CVE-2026-89425
     upstream_fix_url: https://github.com/FasterXML/jackson-core/commit/211cf2c5d91abbec38067f37efc1363cd4e88ee3
     advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-89425
@@ -26,12 +26,19 @@ fixes:
     basis: adapted
     artifacts:
       - com.fasterxml.jackson.core:jackson-core
-    note: New in 2.15.4.1-backpatch-00003 (backpatch-jackson-core@0499f4e).
+    note: Carried from 2.15.4.1-backpatch-00003; ported onto 2.15.4; fixed at 2.15.4.1-backpatch-00003 (backpatch-jackson-core@0499f4e).
+  - cve: CVE-2026-54513
+    upstream_fix_url: https://github.com/FasterXML/jackson-databind/commit/01d1692c8d0ed03e51a0e3c4f8a9e6908e4931e5
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-54513
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-jackson-databind/commit/4ba8fe6
+    basis: adapted
+    artifacts:
+      - com.fasterxml.jackson.core:jackson-databind
+    note: New in this release; ported onto 2.15.4; fixed at 2.15.4.1-backpatch-00004 (backpatch-jackson-databind@4ba8fe6).
 tests:
-  commit: 0499f4e6a446c2eea5daee024554c2f73b9bd7e1
-  command: JAVA_HOME=<jdk-8> mvn -B clean test
-  runtime: Azul Zulu (Java 1.8.0_382), Apache Maven 3.9.16, macOS aarch64
-  report: jackson-core-2.15.4.1-backpatch-00003-tests.zip
-  report_sha256: 2129a103bd3edcb833252bece63e6ffd0e8c142d571e2ca7ccbd38200d8ad689
+  commit: 3b6cd5123af13abc5655bd88f3f7737235ddce4d
+  command: none in this repository
+  runtime: none, no build or test ran for this release
+  report: carried, see the evidence of the release named in the note
   result: pass
-  note: the full suite, 1246 tests run, 0 failed, 0 skipped; the regression tests for CVE-2026-89425 are ParserErrorHandlingTest; the suite ran at dbfd8c4bd19b, the same tree as this commit apart from .backpatch/patch-evidence.yaml
+  note: this release changes only the versions this repository pins, nothing ran here; its test provenance is CVE-2026-54513 carried by moderne-backpatch-alliance/backpatch-jackson-databind at v2.15.4.1-backpatch-00004, whose .backpatch/patch-evidence.yaml records the tests that ran
