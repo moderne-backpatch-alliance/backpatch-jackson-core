@@ -1653,7 +1653,7 @@ public class NonBlockingJsonParser
                 if (_inputPtr >= _inputEnd) {
                     _textBuffer.setCurrentLength(outPtr);
                     _minorState = MINOR_NUMBER_FRACTION_DIGITS;
-                    _fractLength = fractLen;
+                    _setFractLength(fractLen);
                     return (_currToken = JsonToken.NOT_AVAILABLE);
                 }
                 ch = _inputBuffer[_inputPtr++]; // ok to have sign extension for now
@@ -1672,7 +1672,7 @@ public class NonBlockingJsonParser
                 ++fractLen;
             }
         }
-        _fractLength = fractLen;
+        _setFractLength(fractLen);
         int expLen = 0;
         if (ch == INT_e || ch == INT_E) { // exponent?
             if (outPtr >= outBuf.length) {
@@ -1708,7 +1708,7 @@ public class NonBlockingJsonParser
                 if (_inputPtr >= _inputEnd) {
                     _textBuffer.setCurrentLength(outPtr);
                     _minorState = MINOR_NUMBER_EXPONENT_DIGITS;
-                    _expLength = expLen;
+                    _setExpLength(expLen);
                     return (_currToken = JsonToken.NOT_AVAILABLE);
                 }
                 ch = _inputBuffer[_inputPtr++];
@@ -1723,7 +1723,7 @@ public class NonBlockingJsonParser
         --_inputPtr;
         _textBuffer.setCurrentLength(outPtr);
         // negative, int-length, fract-length already set, so...
-        _expLength = expLen;
+        _setExpLength(expLen);
         return _valueComplete(JsonToken.VALUE_NUMBER_FLOAT);
     }
 
@@ -1743,7 +1743,7 @@ public class NonBlockingJsonParser
             outBuf[outPtr++] = (char) ch;
             if (_inputPtr >= _inputEnd) {
                 _textBuffer.setCurrentLength(outPtr);
-                _fractLength = fractLen;
+                _setFractLength(fractLen);
                 return JsonToken.NOT_AVAILABLE;
             }
         }
@@ -1753,7 +1753,7 @@ public class NonBlockingJsonParser
         if (fractLen == 0) {
             reportUnexpectedNumberChar(ch, "Decimal point not followed by a digit");
         }
-        _fractLength = fractLen;
+        _setFractLength(fractLen);
         _textBuffer.setCurrentLength(outPtr);
 
         // Ok: end of floating point number or exponent?
@@ -1803,7 +1803,7 @@ public class NonBlockingJsonParser
             outBuf[outPtr++] = (char) ch;
             if (_inputPtr >= _inputEnd) {
                 _textBuffer.setCurrentLength(outPtr);
-                _expLength = expLen;
+                _setExpLength(expLen);
                 return JsonToken.NOT_AVAILABLE;
             }
             ch = _inputBuffer[_inputPtr++];
@@ -1817,7 +1817,7 @@ public class NonBlockingJsonParser
         --_inputPtr;
         _textBuffer.setCurrentLength(outPtr);
         // negative, int-length, fract-length already set, so...
-        _expLength = expLen;
+        _setExpLength(expLen);
         return _valueComplete(JsonToken.VALUE_NUMBER_FLOAT);
     }
 
@@ -2922,6 +2922,18 @@ public class NonBlockingJsonParser
     private void _setIntLength(final int len) throws IOException {
         _verifyNumberLength(len);
         _intLength = len;
+    }
+
+    private void _setFractLength(final int len) throws IOException {
+        // assumes that the _intLength has been updated first
+        _verifyNumberLength(_intLength + len);
+        _fractLength = len;
+    }
+
+    private void _setExpLength(final int len) throws IOException {
+        // assumes that the _intLength and _fractLength have been updated already
+        _verifyNumberLength(_intLength + _fractLength + len);
+        _expLength = len;
     }
 
 
