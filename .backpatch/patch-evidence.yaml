@@ -1,6 +1,6 @@
 schema: osera-patch-evidence/0.1.0
 producer: moderne
-release: 2.13.5.1-backpatch-00014
+release: 2.13.5.1-backpatch-00015
 baseline: v2.13.5+backpatch.baseline
 fixes:
   - cve: CVE-2025-52999
@@ -159,12 +159,11 @@ fixes:
     artifacts:
       - com.fasterxml.jackson.core:jackson-core
       - com.fasterxml.jackson.jr:jackson-jr-all
-    note: New in this release; ported onto 2.13.5; fixed at 2.13.5.1-backpatch-00014 (backpatch-jackson-core@58bfacd).
+    note: Carried from 2.13.5.1-backpatch-00014; ported onto 2.13.5; fixed at 2.13.5.1-backpatch-00014 (backpatch-jackson-core@58bfacd).
 tests:
-  commit: 58bfacda8bf98345ba8ed1a479169d7b7a6743e9
-  command: JAVA_HOME=<jdk-8> mvn -B -Dmaven.javadoc.skip=true -Denforcer.skip=true -Dgpg.skip=true clean test
-  runtime: Azul Zulu (Java 1.8.0_382), Apache Maven 3.9.16, macOS aarch64
-  report: jackson-core-2.13.5.1-backpatch-00014-tests.zip
-  report_sha256: c6e074813b31b10ac2069d58d81ba9128ace824b9c3729dd0a5940092ffe6bbb
+  commit: 0adf6068045bc4a41a32437fa9c3c0b8db45f933
+  command: none in this repository
+  runtime: none, no build or test ran for this release
+  report: carried, see the evidence of the release named in the note
   result: pass
-  note: the full suite, 945 tests run, 0 failed, 0 errors, 0 skipped; the regression tests for CVE-2026-18401 are AsyncLargeNumberReadTest testAsyncParserFailsTooLongDecimal and testAsyncParserFailsTooLongDecimalWithExponent, which fail without the NonBlockingJsonParser change, and testAsyncParserFailsTooLongInt, which passes either way because the integer limit predates it (2.13.5.1-backpatch-00002); jackson-jr-all is rebuilt from jackson-jr 2.13.5 with this release's jackson-core shaded in, and its test evidence is recorded by moderne-backpatch-alliance/backpatch-jackson-bom at v2.13.5.1-backpatch-00014
+  note: "this release is a tooling update, it carries no new fix, nothing ran here; its test provenance is tooling-2026-11-03-jackson-2.13: a tooling update of moderne-backpatch-alliance/backpatch-jackson-bom at v2.13.5.1-backpatch-00014, whose .backpatch/patch-evidence.yaml says what ran"
