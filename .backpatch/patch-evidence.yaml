@@ -1,6 +1,6 @@
 schema: osera-patch-evidence/0.1.0
 producer: moderne
-release: 2.9.10.1-backpatch-00005
+release: 2.9.10.1-backpatch-00006
 baseline: v2.9.10+backpatch.baseline
 fixes:
   - cve: CVE-2020-36518
@@ -42,12 +42,20 @@ fixes:
     basis: adapted
     artifacts:
       - com.fasterxml.jackson.core:jackson-databind
-    note: "New in this release; ported onto 2.9.10; fixed at 2.9.10.8.1-backpatch-00005 (backpatch-jackson-databind@3f13f16..ae0bc69). jackson-databind no longer looks up the host when it deserializes an `InetSocketAddress` (CVE-2026-54514), so every value comes back unresolved, `\"127.0.0.1:8080\"` included. If your app reads socket addresses from JSON and connects with them or calls `getAddress()`, the connect now throws `UnknownHostException` and `getAddress()` returns null. Resolve the address yourself where you use it: `new InetSocketAddress(addr.getHostString(), addr.getPort())` does the lookup at that point."
+    note: "Carried from 2.9.10.1-backpatch-00005; ported onto 2.9.10; fixed at 2.9.10.8.1-backpatch-00005 (backpatch-jackson-databind@3f13f16..ae0bc69). jackson-databind no longer looks up the host when it deserializes an `InetSocketAddress` (CVE-2026-54514), so every value comes back unresolved, `\"127.0.0.1:8080\"` included. If your app reads socket addresses from JSON and connects with them or calls `getAddress()`, the connect now throws `UnknownHostException` and `getAddress()` returns null. Resolve the address yourself where you use it: `new InetSocketAddress(addr.getHostString(), addr.getPort())` does the lookup at that point."
+  - cve: CVE-2026-54515
+    upstream_fix_url: https://github.com/advisories/GHSA-5jmj-h7xm-6q6v
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-54515
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-jackson-databind/commit/ca8beb0
+    basis: adapted
+    artifacts:
+      - com.fasterxml.jackson.core:jackson-databind
+    note: New in this release; ported onto 2.9.10; fixed at 2.9.10.8.1-backpatch-00006 (backpatch-jackson-databind@ca8beb0).
 tests:
-  commit: 7b65bad38393cfc775df339040c1dbf1d37c9c4d
+  commit: 7bd643c19a1df2c8835180037fb6deea8a94ebeb
   command: none in this repository
   runtime: none, no build or test ran for this release
-  report: jackson-databind-2.9.10.8.1-backpatch-00005-tests.zip
-  report_sha256: 5e52dbbf40588400d780fdf88c15573b2aeadac810a19986448cc0fa7a7ba1f5
+  report: jackson-databind-2.9.10.8.1-backpatch-00006-tests.zip
+  report_sha256: 86349b27b3fde407bb4cd304e9ab6ff9c64ed6b223ef3d1e7f00e2dc7cc0f0fe
   result: pass
-  note: this release changes only the versions this repository pins, nothing ran here; its test provenance is CVE-2026-54514 carried by moderne-backpatch-alliance/backpatch-jackson-databind at v2.9.10.8.1-backpatch-00005, whose .backpatch/patch-evidence.yaml records the tests that ran
+  note: this release changes only the versions this repository pins, nothing ran here; its test provenance is CVE-2026-54515 carried by moderne-backpatch-alliance/backpatch-jackson-databind at v2.9.10.8.1-backpatch-00006, whose .backpatch/patch-evidence.yaml records the tests that ran
