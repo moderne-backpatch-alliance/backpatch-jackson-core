@@ -1,6 +1,6 @@
 schema: osera-patch-evidence/0.1.0
 producer: moderne
-release: 2.9.10.1-backpatch-00001
+release: 2.9.10.1-backpatch-00002
 baseline: v2.9.10+backpatch.baseline
 fixes:
   - cve: CVE-2020-36518
@@ -10,12 +10,20 @@ fixes:
     basis: adapted
     artifacts:
       - com.fasterxml.jackson.core:jackson-databind
-    note: New in this release; ported onto 2.9.10; fixed at 2.9.10.8.1-backpatch-00001 (backpatch-jackson-databind@fd61dfb..67b5e7b).
+    note: Carried from 2.9.10.1-backpatch-00001; ported onto 2.9.10; fixed at 2.9.10.8.1-backpatch-00001 (backpatch-jackson-databind@fd61dfb..67b5e7b).
+  - cve: CVE-2022-42003
+    upstream_fix_url: https://github.com/advisories/GHSA-jjjh-jjxp-wpff
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2022-42003
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-jackson-databind/compare/c4538cd~1...87883e1
+    basis: adapted
+    artifacts:
+      - com.fasterxml.jackson.core:jackson-databind
+    note: New in this release; ported onto 2.9.10; fixed at 2.9.10.8.1-backpatch-00002 (backpatch-jackson-databind@c4538cd..87883e1).
 tests:
-  commit: d4bfe205405caf948de35b4380f2d3221cdad072
+  commit: 6255b05c22265b8461ed8f3a2ff572214653d492
   command: none in this repository
   runtime: none, no build or test ran for this release
-  report: jackson-databind-2.9.10.8.1-backpatch-00001-tests.zip
-  report_sha256: a7581d2de768a383c4072dd697a492cc81a7316d965ab33871ee7d1bf95f68da
+  report: jackson-databind-2.9.10.8.1-backpatch-00002-tests.zip
+  report_sha256: aa7583332e156fdf4b4e0a367a58df53081149435f721272a4be8a2070c77dcd
   result: pass
-  note: this release changes only the versions this repository pins, nothing ran here; its test provenance is CVE-2020-36518 carried by moderne-backpatch-alliance/backpatch-jackson-databind at v2.9.10.8.1-backpatch-00001, whose .backpatch/patch-evidence.yaml records the tests that ran
+  note: this release changes only the versions this repository pins, nothing ran here; its test provenance is CVE-2022-42003 carried by moderne-backpatch-alliance/backpatch-jackson-databind at v2.9.10.8.1-backpatch-00002, whose .backpatch/patch-evidence.yaml records the tests that ran
