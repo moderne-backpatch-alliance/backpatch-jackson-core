@@ -1,0 +1,21 @@
+schema: osera-patch-evidence/0.1.0
+producer: moderne
+release: 2.9.10.1-backpatch-00001
+baseline: v2.9.10+backpatch.baseline
+fixes:
+  - cve: CVE-2020-36518
+    upstream_fix_url: https://github.com/FasterXML/jackson-databind/commit/83b928dab9ba6ef81cf48987fcd12071e1ddb0c9
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2020-36518
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-jackson-databind/compare/fd61dfb~1...67b5e7b
+    basis: adapted
+    artifacts:
+      - com.fasterxml.jackson.core:jackson-databind
+    note: New in this release; ported onto 2.9.10; fixed at 2.9.10.8.1-backpatch-00001 (backpatch-jackson-databind@fd61dfb..67b5e7b).
+tests:
+  commit: d4bfe205405caf948de35b4380f2d3221cdad072
+  command: none in this repository
+  runtime: none, no build or test ran for this release
+  report: jackson-databind-2.9.10.8.1-backpatch-00001-tests.zip
+  report_sha256: a7581d2de768a383c4072dd697a492cc81a7316d965ab33871ee7d1bf95f68da
+  result: pass
+  note: this release changes only the versions this repository pins, nothing ran here; its test provenance is CVE-2020-36518 carried by moderne-backpatch-alliance/backpatch-jackson-databind at v2.9.10.8.1-backpatch-00001, whose .backpatch/patch-evidence.yaml records the tests that ran
