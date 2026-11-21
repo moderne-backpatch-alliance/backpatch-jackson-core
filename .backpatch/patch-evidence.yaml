@@ -1,6 +1,6 @@
 schema: osera-patch-evidence/0.1.0
 producer: moderne
-release: 2.15.4.1-backpatch-00023
+release: 2.15.4.1-backpatch-00024
 baseline: v2.15.4+backpatch.baseline
 fixes:
   - cve: CVE-2026-18401
@@ -189,12 +189,20 @@ fixes:
     basis: adapted
     artifacts:
       - com.fasterxml.jackson.dataformat:jackson-dataformat-cbor
-    note: New in this release; ported onto 2.15.4; fixed at 2.15.4.1-backpatch-00023 (backpatch-jackson-dataformats-binary@2858f43).
+    note: Carried from 2.15.4.1-backpatch-00023; ported onto 2.15.4; fixed at 2.15.4.1-backpatch-00023 (backpatch-jackson-dataformats-binary@2858f43).
+  - cve: CVE-2026-110879
+    upstream_fix_url: https://github.com/FasterXML/jackson-databind/compare/9e7c79ca2731d5c95e3d505110427435c02d9868~1...f8f66a6c1febd1cf7ed29ab5e3d7abfa03f7a98f
+    advisory_url: https://nvd.nist.gov/vuln/detail/CVE-2026-110879
+    patch_commit_url: https://github.com/moderne-backpatch-alliance/backpatch-jackson-databind/commit/1c87599
+    basis: adapted
+    artifacts:
+      - com.fasterxml.jackson.core:jackson-databind
+    note: New in this release; ported onto 2.15.4; fixed at 2.15.4.1-backpatch-00024 (backpatch-jackson-databind@1c87599).
 tests:
-  commit: ddf5e56ee590127b3b12894758868b101df8a1e7
+  commit: 88d0598a3d88135a896fde42ec452b5e6116ab1d
   command: none in this repository
   runtime: none, no build or test ran for this release
-  report: jackson-dataformat-cbor-2.15.4.1-backpatch-00023-tests.zip
-  report_sha256: ffc99a9efd5a2de4f8111f1d70749f179fb8ae506ff1a3fc7dc0447d02192657
+  report: jackson-databind-2.15.4.1-backpatch-00024-tests.zip
+  report_sha256: 5dade0013b86fc07668b89357db9390107776866b7d3fc1c66495fe957952d3b
   result: pass
-  note: this release changes only the versions this repository pins, nothing ran here; its test provenance is CVE-2026-106554 carried by moderne-backpatch-alliance/backpatch-jackson-dataformats-binary at v2.15.4.1-backpatch-00023, whose .backpatch/patch-evidence.yaml records the tests that ran
+  note: this release changes only the versions this repository pins, nothing ran here; its test provenance is CVE-2026-110879 carried by moderne-backpatch-alliance/backpatch-jackson-databind at v2.15.4.1-backpatch-00024, whose .backpatch/patch-evidence.yaml records the tests that ran
