@@ -2887,14 +2887,14 @@ public class UTF8DataInputJsonParser
 
         // No column tracking since we do not have pointers, DataInput has no offset
         
-        return new JsonLocation(_getSourceReference(), -1L, -1L, _tokenInputRow, -1);
+        return new JsonLocation(_contentReference(), -1L, -1L, _tokenInputRow, -1);
     }
 
     @Override
     public JsonLocation getCurrentLocation() {
         // No column tracking since we do not have pointers, DataInput has no offset
         final int col = -1;
-        return new JsonLocation(_getSourceReference(), -1L, -1L,
+        return new JsonLocation(_contentReference(), -1L, -1L,
                 _currInputRow, col);
     }
 

@@ -132,10 +132,13 @@ public class ReaderBasedJsonParser
     {
         super(ctxt, features);
         _reader = r;
+        _objectCodec = codec;
         _inputBuffer = inputBuffer;
         _inputPtr = start;
         _inputEnd = end;
-        _objectCodec = codec;
+        _currInputRowStart = start;
+        // If we have offset, need to omit that from byte offset, so:
+        _currInputProcessed = -start;
         _symbols = st;
         _hashSeed = st.hashSeed();
         _bufferRecyclable = bufferRecyclable;
@@ -2837,17 +2840,17 @@ public class ReaderBasedJsonParser
     {
         if (_currToken == JsonToken.FIELD_NAME) {
             long total = _currInputProcessed + (_nameStartOffset-1);
-            return new JsonLocation(_getSourceReference(),
+            return new JsonLocation(_contentReference(),
                     -1L, total, _nameStartRow, _nameStartCol);
         }
-        return new JsonLocation(_getSourceReference(),
+        return new JsonLocation(_contentReference(),
                 -1L, _tokenInputTotal-1, _tokenInputRow, _tokenInputCol);
     }
 
     @Override
     public JsonLocation getCurrentLocation() {
         final int col = _inputPtr - _currInputRowStart + 1; // 1-based
-        return new JsonLocation(_getSourceReference(),
+        return new JsonLocation(_contentReference(),
                 -1L, _currInputProcessed + _inputPtr,
                 _currInputRow, col);
     }

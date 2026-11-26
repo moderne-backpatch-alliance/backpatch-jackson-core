@@ -15,15 +15,23 @@ import com.fasterxml.jackson.core.util.TextBuffer;
 public class IOContext
 {
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Configuration
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
      * Reference to the source object, which can be used for displaying
      * location information
      */
+    protected final ContentReference _contentReference;
+
+    /**
+     * Old, deprecated "raw" reference to input source.
+     *
+     * @deprecated Since 2.13, use {@link #_contentReference} instead
+     */
+    @Deprecated
     protected final Object _sourceRef;
 
     /**
@@ -42,9 +50,9 @@ public class IOContext
     protected final boolean _managedResource;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Buffer handling, recycling
-    /**********************************************************
+    /**********************************************************************
      */
 
     /**
@@ -93,16 +101,31 @@ public class IOContext
     protected char[] _nameCopyBuffer;
 
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Life-cycle
-    /**********************************************************
+    /**********************************************************************
      */
 
-    public IOContext(BufferRecycler br, Object sourceRef, boolean managedResource)
+    /**
+     * Main constructor to use.
+     * 
+     * @param br BufferRecycler to use, if any ({@code null} if none)
+     * @param contentRef Input source reference for location reporting
+     * @param managedResource Whether input source is managed (owned) by Jackson library
+     *
+     * @since 2.13
+     */
+    public IOContext(BufferRecycler br, ContentReference contentRef, boolean managedResource)
     {
         _bufferRecycler = br;
-        _sourceRef = sourceRef;
+        _contentReference = contentRef;
+        _sourceRef = contentRef.getRawContent();
         _managedResource = managedResource;
+    }
+
+    @Deprecated // since 2.13
+    public IOContext(BufferRecycler br, Object rawContent, boolean managedResource) {
+        this(br, ContentReference.rawReference(rawContent), managedResource);
     }
 
     public void setEncoding(JsonEncoding enc) {
@@ -113,21 +136,39 @@ public class IOContext
         _encoding = enc;
         return this;
     }
-    
+
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API, accessors
-    /**********************************************************
+    /**********************************************************************
      */
 
-    public Object getSourceReference() { return _sourceRef; }
     public JsonEncoding getEncoding() { return _encoding; }
     public boolean isResourceManaged() { return _managedResource; }
 
+    /**
+     * Accessor for getting (some) information about input source, mostly
+     * usable for error reporting purposes.
+     * 
+     * @return Reference to input source
+     *
+     * @since 2.13
+     */
+    public ContentReference contentReference() {
+        return _contentReference;
+    }
+
+    /**
+     * @deprecated Since 2.13, use {@link #contentReference()} instead
+     * @return "Raw" source reference
+     */
+    @Deprecated
+    public Object getSourceReference() { return _sourceRef; }
+
     /*
-    /**********************************************************
+    /**********************************************************************
     /* Public API, buffer management
-    /**********************************************************
+    /**********************************************************************
      */
 
     public TextBuffer constructTextBuffer() {

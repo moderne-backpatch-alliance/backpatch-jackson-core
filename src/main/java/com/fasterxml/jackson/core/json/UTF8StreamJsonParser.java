@@ -3582,7 +3582,10 @@ public class UTF8StreamJsonParser
             char c = (char) _decodeCharForError(i);
             if (!Character.isJavaIdentifierPart(c)) {
                 // 11-Jan-2016, tatu: note: we will fully consume the character,
-                // included or not, so if recovery was possible, it'd be off-by-one...
+                //   included or not, so if recovery was possible, it'd be off-by-one...
+                // 04-Apr-2021, tatu: ... and the reason we can't do much about it is
+                //   because it may be multi-byte UTF-8 character (and even if saved
+                //   offset, on buffer boundary it would not work, still)
                 break;
             }
             sb.append(c);
@@ -3754,10 +3757,10 @@ public class UTF8StreamJsonParser
     {
         if (_currToken == JsonToken.FIELD_NAME) {
             long total = _currInputProcessed + (_nameStartOffset-1);
-            return new JsonLocation(_getSourceReference(),
+            return new JsonLocation(_contentReference(),
                     total, -1L, _nameStartRow, _nameStartCol);
         }
-        return new JsonLocation(_getSourceReference(),
+        return new JsonLocation(_contentReference(),
                 _tokenInputTotal-1, -1L, _tokenInputRow, _tokenInputCol);
     }
 
@@ -3766,7 +3769,7 @@ public class UTF8StreamJsonParser
     public JsonLocation getCurrentLocation()
     {
         int col = _inputPtr - _currInputRowStart + 1; // 1-based
-        return new JsonLocation(_getSourceReference(),
+        return new JsonLocation(_contentReference(),
                 _currInputProcessed + _inputPtr, -1L, // bytes, chars
                 _currInputRow, col);
     }

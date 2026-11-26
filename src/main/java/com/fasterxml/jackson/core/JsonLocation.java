@@ -7,6 +7,8 @@ package com.fasterxml.jackson.core;
 
 import java.nio.charset.Charset;
 
+import com.fasterxml.jackson.core.io.ContentReference;
+
 /**
  * Object that encapsulates Location information used for reporting
  * parsing (or potentially generation) errors, as well as current location
@@ -15,7 +17,7 @@ import java.nio.charset.Charset;
 public class JsonLocation
     implements java.io.Serializable
 {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L; // in 2.13
 
     /**
      * Include at most first 500 characters/bytes from contents; should be enough
@@ -33,7 +35,8 @@ public class JsonLocation
      * NOTE: before 2.9, Location was given as String "N/A"; with 2.9 it was
      * removed so that source should be indicated as "UNKNOWN".
      */
-    public final static JsonLocation NA = new JsonLocation(null, -1L, -1L, -1, -1);
+    public final static JsonLocation NA = new JsonLocation(ContentReference.unknown(),
+            -1L, -1L, -1, -1);
 
     protected final long _totalBytes;
     protected final long _totalChars;
@@ -42,30 +45,65 @@ public class JsonLocation
     protected final int _columnNr;
 
     /**
-     * Displayable description for input source: file path, URL.
-     *<p>
-     * NOTE: <code>transient</code> since 2.2 so that Location itself is Serializable.
+     * Reference to input source; never null (but may be that of
+     * {@link ContentReference#unknown()}).
+     *
+     * @since 2.13 (before we have {@code _sourceRef} (Object-valued)
      */
-    final transient Object _sourceRef;
+    protected final ContentReference _contentReference;
 
-    public JsonLocation(Object srcRef, long totalChars, int lineNr, int colNr)
+    public JsonLocation(ContentReference contentRef, long totalChars,
+            int lineNr, int colNr)
     {
-        /* Unfortunately, none of legal encodings are straight single-byte
-         * encodings. Could determine offset for UTF-16/UTF-32, but the
-         * most important one is UTF-8...
-         * so for now, we'll just not report any real byte count
-         */
-        this(srcRef, -1L, totalChars, lineNr, colNr);
+        this(contentRef, -1L, totalChars, lineNr, colNr);
     }
 
-    public JsonLocation(Object sourceRef, long totalBytes, long totalChars,
+    public JsonLocation(ContentReference contentRef, long totalBytes, long totalChars,
             int lineNr, int columnNr)
     {
-        _sourceRef = sourceRef;
+        // 14-Mar-2021, tatu: Defensive programming, but also for convenience...
+        if (contentRef == null) {
+            contentRef = ContentReference.unknown();
+        }
+        _contentReference = contentRef;
         _totalBytes = totalBytes;
         _totalChars = totalChars;
         _lineNr = lineNr;
         _columnNr = columnNr;
+    }
+
+    @Deprecated
+    public JsonLocation(Object srcRef, long totalChars, int lineNr, int columnNr) {
+        this(_wrap(srcRef), totalChars, lineNr, columnNr);
+    }
+
+    @Deprecated
+    public JsonLocation(Object srcRef, long totalBytes, long totalChars,
+            int lineNr, int columnNr) {
+        this(_wrap(srcRef), totalBytes, totalChars, lineNr, columnNr);
+    }
+
+    protected static ContentReference _wrap(Object srcRef) {
+        if (srcRef instanceof ContentReference) {
+            return (ContentReference) srcRef;
+        }
+        return ContentReference.construct(false, srcRef);
+    }
+
+    /**
+     * Accessor for information about the original input source content is being
+     * read from. Returned reference is never {@code null} but may not contain
+     * useful information.
+     *<p>
+     * NOTE: not getter, on purpose, to avoid inlusion if serialized using
+     * default Jackson serializer.
+     *
+     * @return Object with information about input source.
+     *
+     * @since 2.13 (to replace {@code getSourceRef})
+     */
+    public ContentReference contentReference() {
+        return _contentReference;
     }
 
     /**
@@ -77,8 +115,13 @@ public class JsonLocation
      * construct the parser instance.
      *
      * @return Source reference this location was constructed with, if any; {@code null} if none
+     *
+     * @deprecated Since 2.13 Use {@link #contentReference} instead
      */
-    public Object getSourceRef() { return _sourceRef; }
+    @Deprecated
+    public Object getSourceRef() {
+        return _contentReference.getRawContent();
+    }
 
     /**
      * @return Line number of the location (1-based)
@@ -129,7 +172,7 @@ public class JsonLocation
     @Override
     public int hashCode()
     {
-        int hash = (_sourceRef == null) ? 1 : _sourceRef.hashCode();
+        int hash = (_contentReference == null) ? 1 : 2;
         hash ^= _lineNr;
         hash += _columnNr;
         hash ^= (int) _totalChars;
@@ -145,9 +188,9 @@ public class JsonLocation
         if (!(other instanceof JsonLocation)) return false;
         JsonLocation otherLoc = (JsonLocation) other;
 
-        if (_sourceRef == null) {
-            if (otherLoc._sourceRef != null) return false;
-        } else if (!_sourceRef.equals(otherLoc._sourceRef)) return false;
+        if (_contentReference == null) {
+            if (otherLoc._contentReference != null) return false;
+        } else if (!_contentReference.equals(otherLoc._contentReference)) return false;
 
         return (_lineNr == otherLoc._lineNr)
             && (_columnNr == otherLoc._columnNr)
@@ -172,7 +215,7 @@ public class JsonLocation
 
     protected StringBuilder _appendSourceDesc(StringBuilder sb)
     {
-        final Object srcRef = _sourceRef;
+        final Object srcRef = _contentReference.getRawContent();
 
         if (srcRef == null) {
             sb.append("UNKNOWN");
@@ -191,31 +234,69 @@ public class JsonLocation
             tn = "char[]";
         }
         sb.append('(').append(tn).append(')');
-        // and then, include (part of) contents for selected types:
-        int len;
-        String charStr = " chars";
 
-        if (srcRef instanceof CharSequence) {
-            CharSequence cs = (CharSequence) srcRef;
-            len = cs.length();
-            len -= _append(sb, cs.subSequence(0, Math.min(len, MAX_CONTENT_SNIPPET)).toString());
-        } else if (srcRef instanceof char[]) {
-            char[] ch = (char[]) srcRef;
-            len = ch.length;
-            len -= _append(sb, new String(ch, 0, Math.min(len, MAX_CONTENT_SNIPPET)));
-        } else if (srcRef instanceof byte[]) {
-            byte[] b = (byte[]) srcRef;
-            int maxLen = Math.min(b.length, MAX_CONTENT_SNIPPET);
-            _append(sb, new String(b, 0, maxLen, Charset.forName("UTF-8")));
-            len = b.length - maxLen;
-            charStr = " bytes";
+        // and then, include (part of) contents for selected types
+        // (never for binary-format data)
+        if (_contentReference.hasTextualContent()) {
+            // First, retrieve declared offset+length for content; handle
+            // negative markers (can't do more for general case)
+            int offset, length;
+            offset = _contentReference.contentOffset();
+            if (offset < 0) {
+                offset = 0;
+                length = 0;
+            } else {
+                length = Math.max(0, _contentReference.contentLength());
+            }
+
+            String unitStr = " chars";
+            String trimmed;
+
+            if (srcRef instanceof CharSequence) {
+                trimmed = _truncate((CharSequence) srcRef, offset, length);
+            } else if (srcRef instanceof char[]) {
+                trimmed = _truncate((char[]) srcRef, offset, length);
+            } else if (srcRef instanceof byte[]) {
+                trimmed = _truncate((byte[]) srcRef, offset, length);
+                unitStr = " bytes";
+            } else {
+                trimmed = null;
+            }
+            if (trimmed != null) {
+                _append(sb, trimmed);
+                final int truncLen = length - trimmed.length();
+                if (truncLen > 0) {
+                    sb.append("[truncated ").append(truncLen).append(unitStr).append(']');
+                }
+            }
         } else {
-            len = 0;
-        }
-        if (len > 0) {
-            sb.append("[truncated ").append(len).append(charStr).append(']');
+            // What should we do with binary content?
         }
         return sb;
+    }
+
+    private String _truncate(CharSequence cs, int start, int length) {
+        final int fullLength = cs.length();
+        start = Math.min(start, fullLength);
+        length = Math.min(Math.min(length, fullLength - start),
+                MAX_CONTENT_SNIPPET);
+        return cs.subSequence(start, start+length).toString();
+    }
+
+    private String _truncate(char[] cs, int start, int length) {
+        final int fullLength = cs.length;
+        start = Math.min(start, fullLength);
+        length = Math.min(Math.min(length, fullLength - start),
+                MAX_CONTENT_SNIPPET);
+        return new String(cs, start, length);
+    }
+
+    private String _truncate(byte[] b, int start, int length) {
+        final int fullLength = b.length;
+        start = Math.min(start, fullLength);
+        length = Math.min(Math.min(length, fullLength - start),
+                MAX_CONTENT_SNIPPET);
+        return new String(b, start, length, Charset.forName("UTF-8"));
     }
 
     private int _append(StringBuilder sb, String content) {

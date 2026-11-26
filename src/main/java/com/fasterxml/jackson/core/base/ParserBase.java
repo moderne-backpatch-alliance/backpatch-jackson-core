@@ -7,6 +7,7 @@ import java.util.Arrays;
 
 import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.core.io.IOContext;
+import com.fasterxml.jackson.core.io.ContentReference;
 import com.fasterxml.jackson.core.io.NumberInput;
 import com.fasterxml.jackson.core.json.DupDetector;
 import com.fasterxml.jackson.core.json.JsonReadContext;
@@ -389,7 +390,7 @@ public abstract class ParserBase extends ParserMinimalBase
      */
     @Override
     public JsonLocation getTokenLocation() {
-        return new JsonLocation(_getSourceReference(),
+        return new JsonLocation(_contentReference(),
                 -1L, getTokenCharacterOffset(), // bytes, chars
                 getTokenLineNr(),
                 getTokenColumnNr());
@@ -402,7 +403,7 @@ public abstract class ParserBase extends ParserMinimalBase
     @Override
     public JsonLocation getCurrentLocation() {
         int col = _inputPtr - _currInputRowStart + 1; // 1-based
-        return new JsonLocation(_getSourceReference(),
+        return new JsonLocation(_contentReference(),
                 -1L, _currInputProcessed + _inputPtr, // bytes, chars
                 _currInputRow, col);
     }
@@ -490,7 +491,7 @@ public abstract class ParserBase extends ParserMinimalBase
             _reportInvalidEOF(String.format(
                     ": expected close marker for %s (start marker at %s)",
                     marker,
-                    _parsingContext.getStartLocation(_getSourceReference())),
+                    _parsingContext.startLocation(_contentReference())),
                     null);
         }
     }
@@ -1062,7 +1063,8 @@ public abstract class ParserBase extends ParserMinimalBase
         JsonReadContext ctxt = getParsingContext();
         _reportError(String.format(
                 "Unexpected close marker '%s': expected '%c' (for %s starting at %s)",
-                (char) actCh, expCh, ctxt.typeDesc(), ctxt.getStartLocation(_getSourceReference())));
+                (char) actCh, expCh, ctxt.typeDesc(),
+                ctxt.startLocation(_contentReference())));
     }
 
     @SuppressWarnings("deprecation")
@@ -1222,16 +1224,30 @@ public abstract class ParserBase extends ParserMinimalBase
      */
 
     /**
-     * Helper method used to encapsulate logic of including (or not) of
-     * "source reference" when constructing {@link JsonLocation} instances.
-     *
      * @since 2.9
+     * @deprecated Since 2.13, use {@link #_contentReference()} instead.
      */
+    @Deprecated
     protected Object _getSourceReference() {
         if (JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION.enabledIn(_features)) {
-            return _ioContext.getSourceReference();
+            return _ioContext.contentReference().getRawContent();
         }
         return null;
+    }
+
+    /**
+     * Helper method used to encapsulate logic of including (or not) of
+     * "content reference" when constructing {@link JsonLocation} instances.
+     *
+     * @return Source reference object, if any; {@code null} if none
+     *
+     * @since 2.13
+     */
+    protected ContentReference _contentReference() {
+        if (JsonParser.Feature.INCLUDE_SOURCE_IN_LOCATION.enabledIn(_features)) {
+            return _ioContext.contentReference();
+        }
+        return ContentReference.unknown();
     }
 
     protected static int[] growArrayBy(int[] arr, int more)

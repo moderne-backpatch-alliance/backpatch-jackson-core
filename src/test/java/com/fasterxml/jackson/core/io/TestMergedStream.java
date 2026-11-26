@@ -11,13 +11,13 @@ public class TestMergedStream
     public void testSimple() throws Exception
     {
         BufferRecycler rec = new BufferRecycler();
-        IOContext ctxt = new IOContext(rec, null, false);
+        IOContext ctxt = new IOContext(rec, ContentReference.UNKNOWN_CONTENT, false);
         // bit complicated; must use recyclable buffer...
         byte[] first = ctxt.allocReadIOBuffer();
         System.arraycopy("ABCDE".getBytes("UTF-8"), 0, first, 99, 5);
         byte[] second = "FGHIJ".getBytes("UTF-8");
 
-        assertNull(ctxt.getSourceReference());
+        assertNull(ctxt.contentReference().getRawContent());
         assertFalse(ctxt.isResourceManaged());
         ctxt.setEncoding(JsonEncoding.UTF8);
         MergedStream ms = new MergedStream(ctxt, new ByteArrayInputStream(second),
